@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prim's Algorithm MST Visualization</title>
+  <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+  <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
+  <!-- Load the external CSS file -->
+  <link href="styles.css" rel="stylesheet" type="text/css"/>
+  <!-- Load the JavaScript file after DOM has loaded -->
+  <script src="prims_mst.min.js" defer></script>
+</head>
+<body>
+<div class="container">
+  <h1>Prim's Algorithm - Minimum Spanning Tree</h1>
+  <h5 style="margin-bottom: 0;">By Jahidul Arafat, Presidential Graduate Research Fellow, CSSE, AU, USA; (ex) Sr. Solution Architect, Oracle</h5>
+  <p style="text-align: center; margin-top: 0;">
+    <a href="https://www.linkedin.com/in/jahidul-arafat-presidential-fellow-phd-student-791a7490/" target="_blank">https://www.linkedin.com/in/jahidul-arafat-presidential-fellow-phd-student-791a7490/</a>
+  </p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="demo">Default Graph Demo</div>
+    <div class="tab" data-tab="custom">Custom Graph Builder</div>
+  </div>
+
+  <div class="tab-content active" id="demo-content">
+    <div class="explanation">
+      <p>Prim's algorithm finds the minimum spanning tree (MST) of a connected weighted undirected graph. It grows the MST one vertex at a time, always adding the lowest-weight edge that connects a vertex in the MST to a vertex outside the MST.</p>
+      <p><strong>Starting node:</strong> <span id="starting-node">0</span></p>
+    </div>
+
+    <div class="visualization-container">
+      <div id="original-graph" class="graph-container">
+        <h2>Original Graph</h2>
+      </div>
+      <div id="mst-graph" class="graph-container">
+        <h2>MST Construction (Current Step)</h2>
+      </div>
+    </div>
+
+    <div class="step-info">
+      <span class="step-number">Step: <span id="step-counter">0</span></span>
+      <div id="step-description"></div>
+    </div>
+
+    <div class="priority-queue">
+      <h3>Priority Queue (Edges being considered)</h3>
+      <div id="priority-queue-content"></div>
+    </div>
+
+    <div class="controls">
+      <button id="prev-step" disabled>Previous Step</button>
+      <button id="next-step">Next Step</button>
+      <button id="restart">Restart</button>
+    </div>
+
+    <div class="state-table">
+      <h3>MST Edges Added</h3>
+      <table id="mst-edges">
+        <thead>
+        <tr>
+          <th>Step</th>
+          <th>Edge</th>
+          <th>Weight</th>
+          <th>Reason for Selection</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Table rows will be added dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="custom-content">
+    <div class="explanation">
+      <p>Create your own graph below. Add nodes, then add edges between them with weights. When you're ready, run Prim's algorithm to find the minimum spanning tree.</p>
+    </div>
+
+    <div class="graph-editor">
+      <h3>Graph Editor</h3>
+
+      <div class="node-editor">
+        <h4>Add/Remove Nodes</h4>
+        <div class="row">
+          <label for="node-id">Node ID:</label>
+          <input type="number" id="node-id" min="0" step="1" value="0">
+          <button id="add-node">Add Node</button>
+          <button id="remove-node" class="danger-button">Remove Node</button>
+        </div>
+      </div>
+
+      <div class="edge-editor">
+        <h4>Add/Remove Edges</h4>
+        <div class="row">
+          <label for="edge-from">From Node:</label>
+          <input type="number" id="edge-from" min="0" step="1" value="0">
+        </div>
+        <div class="row">
+          <label for="edge-to">To Node:</label>
+          <input type="number" id="edge-to" min="0" step="1" value="1">
+        </div>
+        <div class="row">
+          <label for="edge-weight">Weight:</label>
+          <input type="number" id="edge-weight" min="1" step="1" value="1">
+        </div>
+        <div class="row">
+          <button id="add-edge">Add Edge</button>
+          <button id="remove-edge" class="danger-button">Remove Edge</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="clear-graph" class="danger-button">Clear Graph</button>
+        <button id="load-default">Load Selected Graph</button>
+      </div>
+    </div>
+
+    <div id="custom-graph" class="graph-container" style="height: 500px;">
+      <h3>Your Custom Graph</h3>
+    </div>
+
+
+
+    <div class="start-node-selector">
+      <label for="start-node">Starting Node for Prim's Algorithm:</label>
+      <select id="start-node">
+        <option value="0">0</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <button id="run-prims">Run Prim's Algorithm</button>
+    </div>
+    <!-- Legend added here - in the Custom Graph Builder section, before the simulation begins -->
+    <div class="legend">
+      <h3>Visualization Legend</h3>
+      <div class="legend-container">
+        <div class="legend-section">
+          <h4>Node Colors</h4>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4CAF50; border: 2px solid #2E7D32;"></div>
+            <div class="legend-label">Node in MST</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #9C27B0; border: 2px solid #7B1FA2;"></div>
+            <div class="legend-label">Newly Added Node</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF5722; border: 2px solid #E64A19;"></div>
+            <div class="legend-label">Starting Node</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #FFC107; border: 2px solid #FFA000;"></div>
+            <div class="legend-label">Frontier Node (Connected but not in MST)</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #666666; border: 2px solid #444444;"></div>
+            <div class="legend-label">Remaining Node (Original Graph)</div>
+          </div>
+        </div>
+        <div class="legend-section">
+          <h4>Edge Colors</h4>
+          <div class="legend-item">
+            <div class="legend-line" style="background-color: #2E7D32;"></div>
+            <div class="legend-label">Edge in MST</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background-color: #9C27B0;"></div>
+            <div class="legend-label">Newly Added Edge</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line dashed" style="background-color: #FFA000;"></div>
+            <div class="legend-label">Edge in Priority Queue</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background-color: #666666;"></div>
+            <div class="legend-label">Original Graph Edge</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="custom-results">
+      <h3>Prim's Algorithm Results</h3>
+      <div id="custom-mst-graph" class="graph-container">
+        <h3>Minimum Spanning Tree</h3>
+      </div>
+
+      <div class="state-table">
+        <h3>MST Edges</h3>
+        <table id="custom-mst-edges">
+          <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Weight</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- Table rows will be added dynamically -->
+          </tbody>
+        </table>
+
+        <div id="custom-mst-weight" class="explanation" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
